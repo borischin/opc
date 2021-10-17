@@ -59,6 +59,8 @@ key3=值3
 
 ### Complicated Policy Config
 
+complicated_policy_config.rego
+
 ```rego
 package main
 
@@ -90,7 +92,7 @@ else = null
 command with input env=QA, market=TW
 
 ```bash
-opc -m simple_policy_config.rego -i env=QA -i market=TW
+opc -m complicated_policy_config.rego -i env=QA -i market=TW
 ```
 
 output
@@ -108,7 +110,7 @@ output
 command with input env=PROD, market=US
 
 ```bash
-opc -m simple_policy_config.rego -i env=PROD -i market=US
+opc -m complicated_policy_config.rego -i env=PROD -i market=US
 ```
 
 output
