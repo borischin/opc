@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -49,7 +50,7 @@ var OutputFormats = []string{
 
 var queryPackage string
 var moduleFile string
-var inputData []string
+var inputs []string
 var outputFormat string
 
 func GetRootCmd() *cobra.Command {
@@ -58,6 +59,16 @@ func GetRootCmd() *cobra.Command {
 		Short: "Open Policy Configuration",
 		Long:  `This is a tool to manage your configurations via all kinds of policies.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			inputMap, err := processInput(inputs)
+			if err != nil {
+				return err
+			}
+
+			chkRlt := checkOutputFormat(outputFormat)
+			if !chkRlt {
+				return errors.New(fmt.Sprintf("Invalid outputFormat(%s).", outputFormat))
+			}
+
 			content, err := readModule(moduleFile)
 			if err != nil {
 				return err
@@ -76,7 +87,7 @@ func GetRootCmd() *cobra.Command {
 			}
 
 			// eval input
-			rs, err := qry.Eval(ctx, rego.EvalInput(inputData))
+			rs, err := qry.Eval(ctx, rego.EvalInput(inputMap))
 
 			if err != nil {
 				return err
@@ -98,7 +109,7 @@ func GetRootCmd() *cobra.Command {
 	// when this action is called directly.
 	command.Flags().StringVarP(&moduleFile, ARG_MODULE, "m", "", "Rego file path. (required)")
 	command.Flags().StringVarP(&queryPackage, ARG_QUERY_PACKAGE, "q", "main", "Query package name in rego file.")
-	command.Flags().StringSliceVarP(&inputData, ARG_INPUT, "i", []string{}, "Usage: -i key1=value1 -i key2=value2 ...")
+	command.Flags().StringSliceVarP(&inputs, ARG_INPUT, "i", []string{}, "Usage: -i key1=value1 -i key2=value2 ...")
 	command.Flags().StringVarP(&outputFormat, ARG_FORMAT, "f", FORMAT_JSON, fmt.Sprintf("output format(%s)", strings.Join(OutputFormats, ", ")))
 
 	command.MarkFlagRequired(ARG_MODULE)
@@ -112,13 +123,16 @@ func Execute() {
 	cobra.CheckErr(GetRootCmd().Execute())
 }
 
-func processInput(inputs []string) map[string]interface{} {
+func processInput(inputs []string) (map[string]interface{}, error) {
 	output := map[string]interface{}{}
 	for _, v := range inputs {
 		parts := strings.Split(v, "=")
+		if len(parts) != 2 {
+			return output, errors.New(fmt.Sprintf("Invalid input(%s).", v))
+		}
 		output[parts[0]] = parts[1]
 	}
-	return output
+	return output, nil
 }
 
 func readModule(file string) (string, error) {
@@ -127,6 +141,15 @@ func readModule(file string) (string, error) {
 		return "", err
 	}
 	return string(content), nil
+}
+
+func checkOutputFormat(format string) bool {
+	for _, v := range OutputFormats {
+		if v == format {
+			return true
+		}
+	}
+	return false
 }
 
 func printEnvFileFormat(cmd *cobra.Command, input map[string]interface{}) error {
