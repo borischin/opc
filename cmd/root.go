@@ -161,7 +161,7 @@ func printEnvFileFormat(cmd *cobra.Command, input map[string]interface{}) error 
 	sort.Strings(keys)
 
 	for _, k := range keys {
-		cmd.Println(fmt.Sprintf("%s=%v", k, input[k]))
+		fmt.Println(fmt.Sprintf("%s=%v", k, input[k]))
 	}
 
 	return nil
@@ -172,7 +172,7 @@ func printJsonFormat(cmd *cobra.Command, input map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	cmd.Println(string(output))
+	fmt.Println(string(output))
 
 	return nil
 }
