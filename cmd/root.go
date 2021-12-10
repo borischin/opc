@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -120,7 +121,20 @@ func GetRootCmd() *cobra.Command {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	cobra.CheckErr(GetRootCmd().Execute())
+	b := bytes.NewBufferString("")
+	cmd := GetRootCmd()
+	cmd.SetErr(b)
+	cmd.SetOut(b)
+	cmd.SetOutput(b)
+	cmd.Execute()
+
+	out, err := ioutil.ReadAll(b)
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(string(out))
+	}
 }
 
 func processInput(inputs []string) (map[string]interface{}, error) {
@@ -161,7 +175,7 @@ func printEnvFileFormat(cmd *cobra.Command, input map[string]interface{}) error 
 	sort.Strings(keys)
 
 	for _, k := range keys {
-		fmt.Println(fmt.Sprintf("%s=%v", k, input[k]))
+		cmd.Println(fmt.Sprintf("%s=%v", k, input[k]))
 	}
 
 	return nil
@@ -172,7 +186,7 @@ func printJsonFormat(cmd *cobra.Command, input map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(output))
+	cmd.Println(string(output))
 
 	return nil
 }
