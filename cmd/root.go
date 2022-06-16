@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -175,7 +176,17 @@ func printEnvFileFormat(cmd *cobra.Command, input map[string]interface{}) error 
 	sort.Strings(keys)
 
 	for _, k := range keys {
-		cmd.Println(fmt.Sprintf("%s=%v", k, input[k]))
+		t := reflect.TypeOf(input[k]).Kind()
+		if t == reflect.Slice || t == reflect.Array || t == reflect.Map {
+			json_bytes, err := json.Marshal(input[k])
+			if err != nil {
+				return err
+			}
+			cmd.Println(fmt.Sprintf("%s=%v", k, string(json_bytes)))
+
+		} else {
+			cmd.Println(fmt.Sprintf("%s=%v", k, input[k]))
+		}
 	}
 
 	return nil

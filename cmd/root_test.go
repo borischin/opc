@@ -164,16 +164,16 @@ func jsonPretty(input []byte, indent string) (string, error) {
 	return dst.String(), nil
 }
 
-func assertJsonEqual(t *testing.T, a, b []byte) {
-	j1, err := jsonPretty(a, "    ")
+func assertJsonEqual(t *testing.T, actual, expect []byte) {
+	j1, err := jsonPretty(actual, "    ")
 	if err != nil {
-		t.Fatalf("\nError: jsonPretty failed, %s\n%s", err, a)
+		t.Fatalf("\nError: jsonPretty failed, %s\n%s", err, actual)
 		return
 	}
 
-	j2, err := jsonPretty(b, "    ")
+	j2, err := jsonPretty(expect, "    ")
 	if err != nil {
-		t.Fatalf("\nError: jsonPretty failed, %s\n%s", err, b)
+		t.Fatalf("\nError: jsonPretty failed, %s\n%s", err, expect)
 		return
 	}
 
@@ -198,6 +198,6 @@ func assertEqual(t *testing.T, a, b []byte) {
 
 func getPath(file string) string { return path.Join(TEST_DATA_DIR, file) }
 
-func showDiff(a, b []byte) string {
-	return fmt.Sprintf("\n[Expected msg contains]\n%s\n-----------------\n[Actual msg]\n%s\n-----------------", a, b)
+func showDiff(actual, expect []byte) string {
+	return fmt.Sprintf("\n[Actual msg contains]\n%s\n-----------------\n[Expected msg]\n%s\n-----------------", actual, expect)
 }
