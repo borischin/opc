@@ -182,7 +182,7 @@ func printEnvFileFormat(cmd *cobra.Command, input map[string]interface{}) error 
 			if err != nil {
 				return err
 			}
-			cmd.Println(fmt.Sprintf("%s=%v", k, string(json_bytes)))
+			cmd.Println(fmt.Sprintf("%s='%v'", k, string(json_bytes)))
 
 		} else {
 			cmd.Println(fmt.Sprintf("%s=%v", k, input[k]))
